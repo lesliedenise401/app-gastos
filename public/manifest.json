@@ -1,0 +1,22 @@
+
+{
+  "id": "/",
+  "name": "MI BOLSILLO - Gestión de gastos",
+  "short_name": "Mi Bolsillo",
+  "description": "Administra tus ingresos, gastos y presupuesto mensual.",
+  "lang": "es-MX",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8F6F2",
+  "theme_color": "#F8F6F2",
+  "icons": [
+    {
+      "src": "/assets/images/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

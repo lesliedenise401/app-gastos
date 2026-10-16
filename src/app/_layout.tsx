@@ -8,6 +8,7 @@ import {
 } from '@expo-google-fonts/space-mono';
 import { Archivo_400Regular, Archivo_700Bold } from '@expo-google-fonts/archivo';
 import * as SplashScreen from 'expo-splash-screen';
+import RegistroPWA from '../components/RegistroPWA';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,12 +26,14 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
 
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayout}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="agregar-gasto" />
-      </Stack>
-    </GestureHandlerRootView>
-  );
+return (
+  <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayout}>
+    <RegistroPWA />
+
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="agregar-gasto" />
+    </Stack>
+  </GestureHandlerRootView>
+);
 }
