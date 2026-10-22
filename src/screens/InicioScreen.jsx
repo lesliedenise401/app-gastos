@@ -14,6 +14,8 @@ import { useGastosStore } from '../store/useGastosStore';
 import TicketItem from '../components/TicketItem';
 import PresupuestoBar from '../components/PresupuestoBar';
 import DonutChart from '../components/DonutChart';
+//ESto borrar para quitar el mapa
+import AyudaSucursal from '../components/AyudaSucursal';
 
 export default function InicioScreen() {
   const router = useRouter();
@@ -35,9 +37,9 @@ export default function InicioScreen() {
     }
   }, [cargado]);
 
-  const saldo = getSaldo();
-  const gastoMes = getGastoDelMes();
-  const porCategoria = getGastoPorCategoria();
+  const saldo = getSaldo(movimientos);
+  const gastoMes = getGastoDelMes(movimientos);
+  const porCategoria = getGastoPorCategoria(movimientos);
   const recientes = movimientos.slice(0, 5);
 
   const irAEditar = (mov) => {
@@ -181,16 +183,6 @@ export default function InicioScreen() {
 
               <View style={styles.grafica}>
                 <DonutChart datos={porCategoria} />
-
-                <View style={styles.graficaTexto}>
-                  <Text style={styles.graficaTitulo}>
-                    Tus gastos
-                  </Text>
-
-                  <Text style={styles.graficaSubtitulo}>
-                    por categoría
-                  </Text>
-                </View>
               </View>
             </View>
 
@@ -206,11 +198,18 @@ export default function InicioScreen() {
                 </Text>
               </View>
 
-              <View style={styles.contador}>
-                <Text style={styles.contadorTexto}>
-                  {recientes.length}
-                </Text>
-              </View>
+              <Pressable
+                style={styles.verTodo}
+                onPress={() => router.push('/historial')}
+                accessibilityRole="link"
+              >
+                <Text style={styles.verTodoTexto}>Ver todo</Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={14}
+                  color={colors.cobre}
+                />
+              </Pressable>
             </View>
           </>
         }
@@ -258,6 +257,8 @@ export default function InicioScreen() {
             </Pressable>
           </View>
         }
+          // Esto tambien borrar para quitarlo de el mapa
+         ListFooterComponent={<AyudaSucursal />}
       />
 
       {/* BOTÓN AGREGAR */}
@@ -503,6 +504,23 @@ const styles = StyleSheet.create({
   },
 
   contadorTexto: {
+    fontFamily: fonts.uiBold,
+    fontSize: 12,
+    color: colors.cobre,
+  },
+  
+    verTodo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: colors.cobreSuave,
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingLeft: 12,
+    paddingRight: 8,
+  },
+
+  verTodoTexto: {
     fontFamily: fonts.uiBold,
     fontSize: 12,
     color: colors.cobre,

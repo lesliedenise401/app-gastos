@@ -1,4 +1,4 @@
-import InicioScreen from '../screens/InicioScreen';
+﻿import InicioScreen from '../../screens/InicioScreen';
 
 export default function Index() {
   return <InicioScreen />;

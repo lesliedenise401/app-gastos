@@ -1,22 +1,44 @@
-
 {
   "id": "/",
-  "name": "MI BOLSILLO - Gestión de gastos",
+  "name": "Mi Bolsillo - Gestión de gastos",
   "short_name": "Mi Bolsillo",
-  "description": "Administra tus ingresos, gastos y presupuesto mensual.",
+  "description": "Administra tus ingresos, gastos y presupuesto mensual, incluso sin conexión.",
   "lang": "es-MX",
-  "start_url": "/",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
-  "background_color": "#F8F6F2",
-  "theme_color": "#F8F6F2",
+  "background_color": "#F6F8FA",
+  "theme_color": "#3F6D73",
+  "categories": ["finance", "productivity", "utilities"],
   "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
     {
-      "src": "/assets/images/icon.png",
-      "sizes": "1024x1024",
-      "type": "image/png",
-      "purpose": "any"
+      "name": "Nuevo gasto",
+      "short_name": "Gasto",
+      "description": "Registrar un gasto rápidamente",
+      "url": "/agregar-gasto?tipo=gasto&source=shortcut",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Nuevo ingreso",
+      "short_name": "Ingreso",
+      "description": "Registrar un ingreso",
+      "url": "/agregar-gasto?tipo=ingreso&source=shortcut",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Historial",
+      "short_name": "Historial",
+      "description": "Ver y filtrar movimientos",
+      "url": "/historial?source=shortcut",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

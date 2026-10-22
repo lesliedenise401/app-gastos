@@ -5,7 +5,6 @@ const DB_NAME = 'mibolsillo-db';
 const STORE_NAME = 'kv';
 const DB_VERSION = 1;
 
-// True solo en navegador real, false en nativo y también false durante el SSR de Expo Router
 const esNavegadorReal =
   Platform.OS === 'web' &&
   typeof window !== 'undefined' &&
@@ -16,7 +15,7 @@ let dbPromise = null;
 async function getDb() {
   if (!esNavegadorReal) return null;
   if (!dbPromise) {
-    const { openDB } = await import('idb'); // import dinámico: nunca se evalúa en SSR/nativo
+    const { openDB } = await import('idb'); 
     dbPromise = openDB(DB_NAME, DB_VERSION, {
       upgrade(db) {
         if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -39,7 +38,7 @@ export const storage = {
     try {
       if (Platform.OS === 'web') {
         const db = await getDb();
-        if (!db) return null; // estamos en SSR, no hay nada que leer
+        if (!db) return null; 
         const valor = await db.get(STORE_NAME, key);
         return valor ?? null;
       }
@@ -54,7 +53,7 @@ export const storage = {
     try {
       if (Platform.OS === 'web') {
         const db = await getDb();
-        if (!db) return false; // SSR: no-op silencioso
+        if (!db) return false; 
         await db.put(STORE_NAME, value, key);
         return true;
       }

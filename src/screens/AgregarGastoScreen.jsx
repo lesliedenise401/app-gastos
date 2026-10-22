@@ -12,13 +12,42 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
+import dayjs from 'dayjs';
 import { colors, fonts } from '../theme/theme';
 import { CATEGORIAS } from '../utils/categorias';
 import { useGastosStore } from '../store/useGastosStore';
+import DateField from '../components/DateField';
+
+const primero = (v) => (Array.isArray(v) ? v[0] : v);
 
 export default function AgregarGastoScreen() {
+  const { movimientoId, tipo } = useLocalSearchParams();
+  const cargado = useGastosStore((s) => s.cargado);
+
+  // Normalizamos los parámetros por si Expo Router los recibe como arreglo
+  const idMovimiento = primero(movimientoId);
+  const tipoInicial = primero(tipo) === 'ingreso' ? 'ingreso' : 'gasto';
+
+  // Si se abre /agregar-gasto?movimientoId=… directamente (recarga, acceso directo),
+  // esperamos a que los datos salgan de IndexedDB para que el formulario no aparezca vacío.
+  if (idMovimiento && !cargado) {
+    return <View style={{ flex: 1, backgroundColor: colors.papel }} />;
+  }
+
+  return (
+    <FormularioMovimiento
+      key={idMovimiento || 'nuevo'}
+      idMovimiento={idMovimiento}
+      tipoInicial={tipoInicial}
+    />
+  );
+}
+
+function FormularioMovimiento({ idMovimiento, tipoInicial }) {
   const router = useRouter();
-  const { movimientoId } = useLocalSearchParams();
+
+  // Si la pantalla se abrió directo (acceso directo de la PWA) no hay a dónde "volver"
+  const salir = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   const {
     movimientos,
@@ -27,11 +56,6 @@ export default function AgregarGastoScreen() {
     eliminarMovimiento,
   } = useGastosStore();
 
-  // Normalizamos el parámetro por si Expo Router lo recibe como arreglo
-  const idMovimiento = Array.isArray(movimientoId)
-    ? movimientoId[0]
-    : movimientoId;
-
   // Buscamos el movimiento solamente si existe un ID
   const existente = idMovimiento
     ? movimientos.find((m) => String(m.id) === String(idMovimiento))
@@ -39,7 +63,7 @@ export default function AgregarGastoScreen() {
 
   const esEdicion = Boolean(existente);
 
-  const [tipo, setTipo] = useState(existente?.tipo ?? 'gasto');
+  const [tipo, setTipo] = useState(existente?.tipo ?? tipoInicial);
 
   const [monto, setMonto] = useState(
     existente?.monto != null ? String(existente.monto) : ''
@@ -53,7 +77,7 @@ export default function AgregarGastoScreen() {
     existente?.nota ?? ''
   );
 
-  const [fecha] = useState(
+  const [fecha, setFecha] = useState(
     existente?.fecha ?? new Date().toISOString()
   );
 
@@ -71,10 +95,15 @@ export default function AgregarGastoScreen() {
     const montoNum = parseFloat(monto.replace(',', '.'));
 
     if (!montoNum || montoNum <= 0) {
-      Alert.alert(
-        'Falta el monto',
-        'Escribe cuánto fue el movimiento.'
-      );
+      if (Platform.OS === 'web') {
+        // Alert.alert no hace nada en web
+        window.alert('Falta el monto. Escribe cuánto fue el movimiento.');
+      } else {
+        Alert.alert(
+          'Falta el monto',
+          'Escribe cuánto fue el movimiento.'
+        );
+      }
       return;
     }
 
@@ -92,7 +121,7 @@ export default function AgregarGastoScreen() {
       agregarMovimiento(datos);
     }
 
-    router.back();
+    salir();
   };
 
   const confirmarEliminar = () => {
@@ -102,7 +131,7 @@ export default function AgregarGastoScreen() {
       if (!existente) return;
 
       eliminarMovimiento(existente.id);
-      router.back();
+      salir();
     };
 
     if (Platform.OS === 'web') {
@@ -139,7 +168,7 @@ export default function AgregarGastoScreen() {
     >
       <View style={styles.cabecera}>
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => salir()}
           hitSlop={10}
         >
           <Ionicons
@@ -260,6 +289,21 @@ export default function AgregarGastoScreen() {
               </Text>
             </Pressable>
           ))}
+        </View>
+
+        <Text style={styles.label}>
+          Fecha
+        </Text>
+
+        <View style={{ marginBottom: 16 }}>
+          <DateField
+            value={dayjs(fecha).format('YYYY-MM-DD')}
+            max={dayjs().format('YYYY-MM-DD')}
+            onChange={(v) => {
+              // Mediodía local: evita que la zona horaria cambie el día guardado
+              if (v) setFecha(dayjs(`${v}T12:00:00`).toISOString());
+            }}
+          />
         </View>
 
         <Text style={styles.label}>
