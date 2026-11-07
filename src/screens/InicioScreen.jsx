@@ -14,8 +14,8 @@ import { useGastosStore } from '../store/useGastosStore';
 import TicketItem from '../components/TicketItem';
 import PresupuestoBar from '../components/PresupuestoBar';
 import DonutChart from '../components/DonutChart';
-//ESto borrar para quitar el mapa
-import AyudaSucursal from '../components/AyudaSucursal';
+//Esto borrar para quitar el mapa
+//import AyudaSucursal from '../components/AyudaSucursal';
 
 export default function InicioScreen() {
   const router = useRouter();
@@ -258,7 +258,7 @@ export default function InicioScreen() {
           </View>
         }
           // Esto tambien borrar para quitarlo de el mapa
-         ListFooterComponent={<AyudaSucursal />}
+         //ListFooterComponent={<AyudaSucursal />}
       />
 
       {/* BOTÓN AGREGAR */}

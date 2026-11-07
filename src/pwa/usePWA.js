@@ -15,6 +15,18 @@ export const estaInstalada = () =>
 export const esIOS = () =>
   esWeb() && /iphone|ipad|ipod/i.test(window.navigator.userAgent || '');
 
+// Chrome avisa UNA sola vez que la app se puede instalar (beforeinstallprompt).
+// Se escucha desde que carga este archivo, sin esperar a que React termine de pintar;
+// si no estamos escuchando en ese momento, el aviso se pierde.
+let alRecibirPrompt = null;
+if (esWeb()) {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); // guardamos el evento para lanzarlo con nuestro propio botón
+    eventoInstalacion = e;
+    if (alRecibirPrompt) alRecibirPrompt();
+  });
+}
+
 export const usePWA = create((set, get) => ({
   enLinea: true,
   swEstado: 'sin-iniciar', 
@@ -34,6 +46,10 @@ export const usePWA = create((set, get) => ({
     const alConectar = () => get().setEnLinea(true);
     const alDesconectar = () => get().setEnLinea(false);
     set({ enLinea: navigator.onLine, instalada: estaInstalada() });
+    
+    // Si Chrome ya avisó antes de que arrancara React, lo aprovechamos
+    alRecibirPrompt = () => set({ puedeInstalar: true });
+    if (eventoInstalacion) set({ puedeInstalar: true });
     window.addEventListener('online', alConectar);
     window.addEventListener('offline', alDesconectar);
 

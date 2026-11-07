@@ -10,7 +10,6 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
 import { colors, fonts } from '../theme/theme';
 import { useGastosStore } from '../store/useGastosStore';
 import { usePWA, esWeb, estaInstalada, esIOS } from '../pwa/usePWA';
@@ -32,6 +31,7 @@ export default function AjustesScreen() {
       <SeccionPresupuesto />
       {Platform.OS === 'web' && <SeccionNotificaciones />}
       {Platform.OS === 'web' && <SeccionInstalacion />}
+            {Platform.OS === 'web' && <SeccionSincronizacion />}
       {Platform.OS === 'web' && <SeccionDiagnostico />}
     </ScrollView>
   );
@@ -181,8 +181,7 @@ function SeccionInstalacion() {
         </Texto>
       ) : (
         <Texto>
-          El navegador aún no ofrece la instalación. Abre el sitio en Chrome o Edge, usa la app unos
-          segundos y vuelve aquí, o busca «Instalar» en el menú del navegador.
+          Si ya la instalaste la aplicacion usala desde su icono.
         </Texto>
       )}
     </Tarjeta>
@@ -378,3 +377,55 @@ const styles = StyleSheet.create({
   filaClave: { fontFamily: fonts.ui, fontSize: 12, color: colors.tintaSuave },
   filaValor: { fontFamily: fonts.monoBold, fontSize: 11, color: colors.tinta, flexShrink: 1, textAlign: 'right' },
 });
+/* ------------------------------------------------------------------ */
+/* SINCRONIZACIÓN CON EL SERVIDOR                                       */
+/* ------------------------------------------------------------------ */
+const ESTADOS_SYNC = {
+  'sin-iniciar': ['Sin iniciar', 'neutro'],
+  sincronizado: ['Sincronizado', 'bueno'],
+  'sin-conexion': ['Sin conexión', 'malo'],
+  'sin-servidor': ['Servidor no disponible', 'neutro'],
+  'no-aplica': ['No disponible en esta plataforma', 'neutro'],
+};
+
+function SeccionSincronizacion() {
+  const estadoSync = useGastosStore((s) => s.estadoSync);
+  const pendientes = useGastosStore((s) => s.pendientes);
+  const sincronizando = useGastosStore((s) => s.sincronizando);
+  const ultimaSync = useGastosStore((s) => s.ultimaSync);
+  const sincronizar = useGastosStore((s) => s.sincronizar);
+
+  const [textoEstado, tono] = ESTADOS_SYNC[estadoSync] || [estadoSync, 'neutro'];
+  const hora = ultimaSync
+    ? new Date(ultimaSync).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+    : 'Aún no';
+
+  return (
+    <Tarjeta
+      icono="sync-outline"
+      titulo="Sincronización"
+      detalle="Tus movimientos se copian solos en el servidor"
+    >
+      <Insignia texto={sincronizando ? 'Sincronizando…' : textoEstado} tono={tono} />
+
+      <Fila clave="Cambios pendientes de enviar" valor={String(pendientes)} />
+      <Fila clave="Última sincronización" valor={hora} ultimo />
+
+      <Boton texto="Sincronizar ahora" onPress={() => sincronizar()} />
+
+      {estadoSync === 'sin-conexion' ? (
+        <Texto>
+          Sin conexión: tus cambios se guardan en este dispositivo y se enviarán solos cuando
+          vuelva internet.
+        </Texto>
+      ) : null}
+
+      {estadoSync === 'sin-servidor' ? (
+        <Texto>
+          No hay un servidor disponible. Tus datos siguen guardados aquí y se enviarán cuando lo
+          haya. Para usarlo, abre la app desde el servidor con el comando pnpm run servidor.
+        </Texto>
+      ) : null}
+    </Tarjeta>
+  );
+}

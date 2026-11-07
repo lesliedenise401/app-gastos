@@ -18,6 +18,21 @@
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
+    "screenshots": [
+    {
+      "src": "/screenshots/mi-bolsillo-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Pantalla principal de Mi Bolsillo en computadora"
+    },
+    {
+      "src": "/screenshots/mi-bolsillo-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "label": "Pantalla principal de Mi Bolsillo en celular"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Nuevo gasto",

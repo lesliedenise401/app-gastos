@@ -56,6 +56,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
 
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith('/api/')) return; // las llamadas al servidor nunca se guardan en caché
   if (url.pathname.includes('/hot') || url.pathname.includes('/__')) return; // dev server
 
   if (req.mode === 'navigate') {
@@ -163,3 +164,96 @@ self.addEventListener('notificationclick', (event) => {
     })()
   );
 });
+  
+/* ---------- SINCRONIZACIÓN EN SEGUNDO PLANO (Background Sync) ---------- */
+// Cuando se anota un cambio, la app le pide al navegador una sincronización con la etiqueta
+// "sync-movimientos". Si no había conexión, el navegador espera y despierta al Service Worker
+// con el evento "sync" cuando vuelve, incluso con la app cerrada.
+const ETIQUETA_SYNC = 'sync-movimientos';
+const CLAVE_COLA = '@mibolsillo_cola';
+const CLAVE_MOVIMIENTOS = '@mibolsillo_movimientos';
+const CLAVE_PRESUPUESTO = '@mibolsillo_presupuesto';
+
+self.addEventListener('sync', (event) => {
+  if (event.tag === ETIQUETA_SYNC) event.waitUntil(sincronizarEnSegundoPlano());
+});
+
+// IndexedDB "a mano": el Service Worker no puede usar los módulos de la app
+function abrirBD() {
+  return new Promise((ok, fallo) => {
+    const peticion = indexedDB.open('mibolsillo-db');
+    peticion.onsuccess = () => ok(peticion.result);
+    peticion.onerror = () => fallo(peticion.error);
+  });
+}
+
+function leerBD(bd, clave) {
+  return new Promise((ok, fallo) => {
+    const peticion = bd.transaction('kv', 'readonly').objectStore('kv').get(clave);
+    peticion.onsuccess = () => ok(peticion.result);
+    peticion.onerror = () => fallo(peticion.error);
+  });
+}
+
+function escribirBD(bd, clave, valor) {
+  return new Promise((ok, fallo) => {
+    const transaccion = bd.transaction('kv', 'readwrite');
+    transaccion.objectStore('kv').put(valor, clave);
+    transaccion.oncomplete = () => ok();
+    transaccion.onerror = () => fallo(transaccion.error);
+  });
+}
+
+function aplicarOps(lista, operaciones) {
+  let resultado = [...lista];
+  for (const op of operaciones) {
+    if (op.tipo === 'guardar' && op.movimiento) {
+      const i = resultado.findIndex((m) => m.id === op.movimiento.id);
+      if (i >= 0) resultado[i] = op.movimiento;
+      else resultado.unshift(op.movimiento);
+    } else if (op.tipo === 'eliminar') {
+      resultado = resultado.filter((m) => m.id !== op.id);
+    }
+  }
+  return resultado;
+}
+
+async function sincronizarEnSegundoPlano() {
+  // Si la app está abierta, ella se encarga: así no chocan dos sincronizaciones a la vez
+  const ventanas = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  if (ventanas.length) {
+    ventanas.forEach((v) => v.postMessage({ type: 'SYNC_PEDIR' }));
+    return;
+  }
+
+  // App cerrada: el Service Worker sincroniza por su cuenta
+  const bd = await abrirBD();
+  const cola = JSON.parse((await leerBD(bd, CLAVE_COLA)) || '[]');
+  if (!cola.length) return;
+
+  const respuesta = await fetch('/api/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ operaciones: cola }),
+  });
+  // Si falla, el error hace que el navegador lo reintente más tarde
+  if (!respuesta.ok) throw new Error(`Sincronización: el servidor respondió ${respuesta.status}`);
+  const datos = await respuesta.json();
+
+  // Cambios que se anotaron mientras tanto se conservan como pendientes
+  const enviados = new Set(cola.map((o) => o.opId));
+  const actual = JSON.parse((await leerBD(bd, CLAVE_COLA)) || '[]');
+  const pendientes = actual.filter((o) => !enviados.has(o.opId));
+
+  const movimientos = aplicarOps(datos.movimientos || [], pendientes);
+  const ultimoPresupuesto = [...pendientes].reverse().find((o) => o.tipo === 'presupuesto');
+  const presupuesto = ultimoPresupuesto ? Number(ultimoPresupuesto.valor) : Number(datos.presupuesto) || 0;
+
+  await escribirBD(bd, CLAVE_MOVIMIENTOS, JSON.stringify(movimientos));
+  await escribirBD(bd, CLAVE_PRESUPUESTO, String(presupuesto));
+  await escribirBD(bd, CLAVE_COLA, JSON.stringify(pendientes));
+
+  // Si la app se abrió justo ahora, que recargue sus datos
+  const abiertas = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  abiertas.forEach((v) => v.postMessage({ type: 'SYNC_OK' }));
+}

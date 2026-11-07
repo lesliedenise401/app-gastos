@@ -11,7 +11,7 @@ export const notificacionesSoportadas = () =>
   Platform.OS === 'web' && typeof window !== 'undefined' && 'Notification' in window;
 
 export const permisoNavegador = () =>
-  notificacionesSoportadas() ? Notification.permission : 'no-soportado'; // default | granted | denied
+  notificacionesSoportadas() ? Notification.permission : 'no-soportado'; 
 
 export async function preferenciaActiva() {
   return (await storage.getItem(PREF_KEY)) === 'si';
