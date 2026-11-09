@@ -236,7 +236,9 @@ async function sincronizarEnSegundoPlano() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ operaciones: cola }),
   });
-  // Si falla, el error hace que el navegador lo reintente más tarde
+  // Sin sesión (venció o se cerró): no tiene caso reintentar. La app pedirá entrar de nuevo al abrirse.
+  if (respuesta.status === 401) return;
+  // Si falla por otra razón, el error hace que el navegador lo reintente más tarde
   if (!respuesta.ok) throw new Error(`Sincronización: el servidor respondió ${respuesta.status}`);
   const datos = await respuesta.json();
 

@@ -1,177 +1,146 @@
 {
-  "movimientos": {
-    "da5bfc0c-19bf-40a8-b261-41128ca1fdb2": {
-      "movimiento": {
-        "id": "da5bfc0c-19bf-40a8-b261-41128ca1fdb2",
-        "tipo": "gasto",
-        "monto": 60,
-        "categoria": "entretenimiento",
-        "nota": "",
-        "fecha": "2026-11-03T21:09:33.813Z",
-        "creadoEn": "2026-11-03T21:09:39.139Z",
-        "actualizadoEn": ""
-      },
-      "ts": 1793992775782,
-      "eliminado": true
+  "version": 2,
+  "usuarios": {
+    "5b9211fa6a30319db807cdec76d0f65e": {
+      "id": "5b9211fa6a30319db807cdec76d0f65e",
+      "nombre": "Leslie",
+      "correo": "mataleslie62@gmail.com",
+      "sal": "4feeb2c0a3eabba82a45019545a84a24",
+      "hash": "99d1bdf24751271a7ec2dfcc649df78373e6d0344e27ea6694e0e230c7066187c4d644b59f4c784244c6f135db46ce9c7ec7faa47d53c22f125ade2b80ed5420",
+      "creadoEn": "2026-11-07T23:09:10.711Z"
     },
-    "dc3d07af-8a34-44a3-8e79-538189df5333": {
-      "movimiento": {
-        "id": "dc3d07af-8a34-44a3-8e79-538189df5333",
-        "tipo": "gasto",
-        "monto": 100,
-        "categoria": "transporte",
-        "nota": "",
-        "fecha": "2026-11-03T21:09:08.818Z",
-        "creadoEn": "2026-11-03T21:09:14.072Z",
-        "actualizadoEn": ""
-      },
-      "ts": 1793992779988,
-      "eliminado": true
-    },
-    "4020d21c-7889-4623-8aa2-41e1f90de6e9": {
-      "movimiento": {
-        "id": "4020d21c-7889-4623-8aa2-41e1f90de6e9",
-        "tipo": "gasto",
-        "monto": 20,
-        "categoria": "entretenimiento",
-        "nota": "",
-        "fecha": "2026-11-02T22:34:09.620Z",
-        "creadoEn": "2026-11-02T22:34:15.844Z",
-        "actualizadoEn": ""
-      },
-      "ts": 1793992783644,
-      "eliminado": true
-    },
-    "f1a0d0fa-ca40-455f-a7a7-d84873379aef": {
-      "movimiento": {
-        "id": "f1a0d0fa-ca40-455f-a7a7-d84873379aef",
-        "tipo": "gasto",
-        "monto": 100,
-        "categoria": "comida",
-        "nota": "",
-        "fecha": "2026-11-02T22:33:56.889Z",
-        "creadoEn": "2026-11-02T22:34:06.675Z",
-        "actualizadoEn": ""
-      },
-      "ts": 1793992787854,
-      "eliminado": true
-    },
-    "5cec4d54-3bd5-4d10-839b-d809260069b8": {
-      "movimiento": {
-        "id": "5cec4d54-3bd5-4d10-839b-d809260069b8",
-        "tipo": "ingreso",
-        "monto": 8000,
-        "categoria": "transporte",
-        "nota": "Pago por hacer trasporte ",
-        "fecha": "2026-10-10T18:00:00.000Z",
-        "creadoEn": "2026-10-24T01:17:27.534Z",
-        "actualizadoEn": ""
-      },
-      "ts": 1793992792029,
-      "eliminado": true
-    },
-    "9cbdd6e9-79d0-40d1-8beb-d3522a3e255a": {
-      "movimiento": {
-        "id": "9cbdd6e9-79d0-40d1-8beb-d3522a3e255a",
-        "tipo": "ingreso",
-        "monto": 1000,
-        "categoria": "otros",
-        "nota": "Pago",
-        "fecha": "2026-10-01T18:00:00.000Z",
-        "creadoEn": "2026-10-24T01:17:01.029Z",
-        "actualizadoEn": ""
-      },
-      "ts": 1793992795919,
-      "eliminado": true
-    },
-    "9b97ae82-7761-4313-bec9-250f06b50eaf": {
-      "movimiento": {
-        "id": "9b97ae82-7761-4313-bec9-250f06b50eaf",
-        "tipo": "gasto",
-        "monto": 60,
-        "categoria": "transporte",
-        "nota": "Pasajes",
-        "fecha": "2026-11-01T18:00:00.000Z",
-        "creadoEn": "2026-11-04T02:10:44.074Z",
-        "actualizadoEn": ""
-      },
-      "ts": 1793992766689,
-      "eliminado": true
-    },
-    "ed769816-e52c-4472-94c8-aa905067dc1c": {
-      "movimiento": {
-        "id": "ed769816-e52c-4472-94c8-aa905067dc1c",
-        "tipo": "ingreso",
-        "monto": 300,
-        "categoria": "otros",
-        "nota": "Pago",
-        "fecha": "2026-11-02T18:00:00.000Z",
-        "creadoEn": "2026-11-04T02:00:35.197Z",
-        "actualizadoEn": ""
-      },
-      "ts": 1793992771110,
-      "eliminado": true
-    },
-    "407a985c-0781-40dc-9f76-96e7f01f878b": {
-      "movimiento": {
-        "id": "407a985c-0781-40dc-9f76-96e7f01f878b",
-        "tipo": "gasto",
-        "monto": 20,
-        "categoria": "transporte",
-        "nota": "Pasaje",
-        "fecha": "2026-11-06T19:20:33.673Z",
-        "creadoEn": "2026-11-06T19:20:42.256Z",
-        "actualizadoEn": "2026-11-06T19:20:42.256Z"
-      },
-      "ts": 1793992842256,
-      "eliminado": false
-    },
-    "479bfa19-f347-4fc7-9125-4ec03cd98555": {
-      "movimiento": {
-        "id": "479bfa19-f347-4fc7-9125-4ec03cd98555",
-        "tipo": "gasto",
-        "monto": 300,
-        "categoria": "entretenimiento",
-        "nota": "streaming",
-        "fecha": "2026-11-06T19:27:35.789Z",
-        "creadoEn": "2026-11-06T19:27:50.214Z",
-        "actualizadoEn": "2026-11-06T19:27:50.214Z"
-      },
-      "ts": 1793993270216,
-      "eliminado": false
-    },
-    "067e7ca4-9e91-4808-a692-bfcdf08685f5": {
-      "movimiento": {
-        "id": "067e7ca4-9e91-4808-a692-bfcdf08685f5",
-        "tipo": "gasto",
-        "monto": 100,
-        "categoria": "salud",
-        "nota": "medicamento",
-        "fecha": "2026-11-06T19:28:00.639Z",
-        "creadoEn": "2026-11-06T19:28:15.044Z",
-        "actualizadoEn": "2026-11-06T19:28:15.044Z"
-      },
-      "ts": 1793993295045,
-      "eliminado": false
-    },
-    "cb249688-e8d6-483e-b06b-9ffabf645647": {
-      "movimiento": {
-        "id": "cb249688-e8d6-483e-b06b-9ffabf645647",
-        "tipo": "ingreso",
-        "monto": 1000,
-        "categoria": "otros",
-        "nota": "",
-        "fecha": "2026-11-06T19:31:45.258Z",
-        "creadoEn": "2026-11-06T19:31:52.992Z",
-        "actualizadoEn": "2026-11-06T19:31:52.992Z"
-      },
-      "ts": 1793993512993,
-      "eliminado": false
+    "a63cc29488aacb6d5f7a845fa2524620": {
+      "id": "a63cc29488aacb6d5f7a845fa2524620",
+      "nombre": "Mateo",
+      "correo": "mati080318@gmail.comm",
+      "sal": "71ff0730d9bb0d127eaaddf174617b38",
+      "hash": "f892f1d4612ec206087f3381ecc1651daf7dfa37d2abf7e6ae559f8960ad24ee1eccccaaba462dee92039a7095b38271f31284c2edc18ba818c43bc61a9f8ec1",
+      "creadoEn": "2026-11-08T03:52:57.157Z"
     }
   },
-  "presupuesto": {
-    "valor": 100,
-    "ts": 1793907747917
+  "sesiones": {
+    "0974672c6c82641e08bee251b43c42a90b4fff41677ab5f9133e0594940186db": {
+      "usuarioId": "5b9211fa6a30319db807cdec76d0f65e",
+      "expira": 1796684950712
+    },
+    "28487ab4ccfc6361985d5a2094fd69439f2eb75d386340e6cb95cf934377f0db": {
+      "usuarioId": "5b9211fa6a30319db807cdec76d0f65e",
+      "expira": 1796685095660
+    },
+    "617cb69e0b2161df18394d3661b107e2a89425b93d7a2feca1a3c0e3c2455644": {
+      "usuarioId": "5b9211fa6a30319db807cdec76d0f65e",
+      "expira": 1796701765952
+    },
+    "58b6b711ee5c596043122be7bf0d8dc6a5ad878c0ec2862f3046357480ccdb17": {
+      "usuarioId": "5b9211fa6a30319db807cdec76d0f65e",
+      "expira": 1796702078417
+    },
+    "d5b7fe705db3157bc23b4a8a2e815e2a55b8145bfdf6c7832917e387476fcb5a": {
+      "usuarioId": "5b9211fa6a30319db807cdec76d0f65e",
+      "expira": 1796702392624
+    }
   },
-  "suscripciones": []
+  "datos": {
+    "5b9211fa6a30319db807cdec76d0f65e": {
+      "movimientos": {
+        "cb249688-e8d6-483e-b06b-9ffabf645647": {
+          "movimiento": {
+            "id": "cb249688-e8d6-483e-b06b-9ffabf645647",
+            "tipo": "ingreso",
+            "monto": 1000,
+            "categoria": "otros",
+            "nota": "",
+            "fecha": "2026-11-06T19:31:45.258Z",
+            "creadoEn": "2026-11-06T19:31:52.992Z",
+            "actualizadoEn": "2026-11-06T19:31:52.992Z"
+          },
+          "ts": 1793993512992,
+          "eliminado": false
+        },
+        "067e7ca4-9e91-4808-a692-bfcdf08685f5": {
+          "movimiento": {
+            "id": "067e7ca4-9e91-4808-a692-bfcdf08685f5",
+            "tipo": "gasto",
+            "monto": 100,
+            "categoria": "salud",
+            "nota": "medicamento",
+            "fecha": "2026-11-06T19:28:00.639Z",
+            "creadoEn": "2026-11-06T19:28:15.044Z",
+            "actualizadoEn": "2026-11-06T19:28:15.044Z"
+          },
+          "ts": 1793993295044,
+          "eliminado": false
+        },
+        "479bfa19-f347-4fc7-9125-4ec03cd98555": {
+          "movimiento": {
+            "id": "479bfa19-f347-4fc7-9125-4ec03cd98555",
+            "tipo": "gasto",
+            "monto": 300,
+            "categoria": "entretenimiento",
+            "nota": "streaming",
+            "fecha": "2026-11-06T19:27:35.789Z",
+            "creadoEn": "2026-11-06T19:27:50.214Z",
+            "actualizadoEn": "2026-11-06T19:27:50.214Z"
+          },
+          "ts": 1793993270214,
+          "eliminado": false
+        },
+        "407a985c-0781-40dc-9f76-96e7f01f878b": {
+          "movimiento": {
+            "id": "407a985c-0781-40dc-9f76-96e7f01f878b",
+            "tipo": "gasto",
+            "monto": 20,
+            "categoria": "transporte",
+            "nota": "Pasaje",
+            "fecha": "2026-11-06T19:20:33.673Z",
+            "creadoEn": "2026-11-06T19:20:42.256Z",
+            "actualizadoEn": "2026-11-06T19:20:42.256Z"
+          },
+          "ts": 1793992842256,
+          "eliminado": false
+        },
+        "f355bbd1-9163-4e1b-8949-99dcbdb48444": {
+          "movimiento": {
+            "id": "f355bbd1-9163-4e1b-8949-99dcbdb48444",
+            "tipo": "ingreso",
+            "monto": 400,
+            "categoria": "otros",
+            "nota": "Pago de una piñata",
+            "fecha": "2026-11-07T23:16:53.177Z",
+            "creadoEn": "2026-11-07T23:17:12.811Z",
+            "actualizadoEn": "2026-11-07T23:17:12.811Z"
+          },
+          "ts": 1794093432814,
+          "eliminado": false
+        },
+        "0619a494-5d92-4881-b0f5-ec02040b155d": {
+          "movimiento": {
+            "id": "0619a494-5d92-4881-b0f5-ec02040b155d",
+            "tipo": "gasto",
+            "monto": 30,
+            "categoria": "comida",
+            "nota": "",
+            "fecha": "2026-11-08T03:50:18.401Z",
+            "creadoEn": "2026-11-08T03:50:26.044Z",
+            "actualizadoEn": "2026-11-08T03:50:26.044Z"
+          },
+          "ts": 1794109826045,
+          "eliminado": false
+        }
+      },
+      "presupuesto": {
+        "valor": 100,
+        "ts": 1
+      },
+      "suscripciones": []
+    },
+    "a63cc29488aacb6d5f7a845fa2524620": {
+      "movimientos": {},
+      "presupuesto": {
+        "valor": 0,
+        "ts": 0
+      },
+      "suscripciones": []
+    }
+  }
 }

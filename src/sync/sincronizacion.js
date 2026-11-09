@@ -65,12 +65,12 @@ async function registrarSyncEnSegundoPlano() {
 }
 
 /**
- * La primera vez, los movimientos que ya existían solo en este dispositivo
- * se anotan para subirlos al servidor.
+ * La primera vez que una cuenta se usa en este dispositivo, los movimientos que ya existían
+ * aquí se anotan para subirlos a esa cuenta. Se recuerda para qué cuenta ya se hizo.
  */
-export async function prepararSyncInicial(movimientos, presupuesto) {
+export async function prepararSyncInicial(movimientos, presupuesto, usuarioId) {
   if (!colaCargada) await cargarCola();
-  if ((await storage.getItem(CLAVE_INICIAL)) === 'si') return;
+  if ((await storage.getItem(CLAVE_INICIAL)) === usuarioId) return;
 
   movimientos.forEach((m) => {
     cola.push({
@@ -83,7 +83,15 @@ export async function prepararSyncInicial(movimientos, presupuesto) {
   if (presupuesto > 0) cola.push({ opId: nuevoId(), tipo: 'presupuesto', valor: presupuesto, ts: 1 });
 
   persistirCola();
-  await storage.setItem(CLAVE_INICIAL, 'si');
+  await storage.setItem(CLAVE_INICIAL, usuarioId);
+}
+
+/** Borra la cola y la marca de "primera sincronización" (al cerrar sesión). */
+export async function limpiarSync() {
+  cola = [];
+  colaCargada = true;
+  await storage.removeItem(CLAVE_COLA);
+  await storage.removeItem(CLAVE_INICIAL);
 }
 
 /** Aplica operaciones pendientes sobre una lista de movimientos. */
@@ -104,7 +112,7 @@ export function aplicarOps(lista, operaciones) {
 /**
  * Envía la cola al servidor y devuelve el resultado:
  *   { estado: 'sincronizado', movimientos, presupuesto, pendientes }
- *   { estado: 'sin-conexion' | 'sin-servidor' | 'no-aplica', pendientes }
+ *   { estado: 'sin-conexion' | 'sin-servidor' | 'sesion-vencida' | 'no-aplica', pendientes }
  */
 export async function sincronizarConServidor() {
   if (!enWeb()) return { estado: 'no-aplica', pendientes: 0 };
@@ -124,6 +132,8 @@ export async function sincronizarConServidor() {
       body: JSON.stringify({ operaciones: enviadas }),
       signal: controlador.signal,
     });
+    // 401: no hay sesión (venció o se cerró). La cola se conserva para enviarla al volver a entrar.
+    if (respuesta.status === 401) return { estado: 'sesion-vencida', pendientes: cola.length };
     if (!respuesta.ok) return { estado: 'sin-servidor', pendientes: cola.length };
 
     const datos = await respuesta.json();

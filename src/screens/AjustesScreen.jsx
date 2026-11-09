@@ -31,7 +31,7 @@ export default function AjustesScreen() {
       <SeccionPresupuesto />
       {Platform.OS === 'web' && <SeccionNotificaciones />}
       {Platform.OS === 'web' && <SeccionInstalacion />}
-            {Platform.OS === 'web' && <SeccionSincronizacion />}
+      {Platform.OS === 'web' && <SeccionCuenta />}
       {Platform.OS === 'web' && <SeccionDiagnostico />}
     </ScrollView>
   );
@@ -378,44 +378,89 @@ const styles = StyleSheet.create({
   filaValor: { fontFamily: fonts.monoBold, fontSize: 11, color: colors.tinta, flexShrink: 1, textAlign: 'right' },
 });
 /* ------------------------------------------------------------------ */
-/* SINCRONIZACIÓN CON EL SERVIDOR                                       */
+/* CUENTA Y SINCRONIZACIÓN                                              */
 /* ------------------------------------------------------------------ */
 const ESTADOS_SYNC = {
   'sin-iniciar': ['Sin iniciar', 'neutro'],
+  'sin-cuenta': ['Sin cuenta', 'neutro'],
   sincronizado: ['Sincronizado', 'bueno'],
   'sin-conexion': ['Sin conexión', 'malo'],
   'sin-servidor': ['Servidor no disponible', 'neutro'],
+  'sesion-vencida': ['Sesión vencida', 'malo'],
   'no-aplica': ['No disponible en esta plataforma', 'neutro'],
 };
 
-function SeccionSincronizacion() {
+const cambios = (n) => `${n} ${n === 1 ? 'cambio' : 'cambios'}`;
+
+// Cerrar sesión borra los datos de este dispositivo, así que siempre se pide confirmación.
+// Si quedan cambios sin enviar al servidor, se avisa antes de perderlos.
+async function cerrarSesionConConfirmacion(cerrarSesion) {
+  const seguro = window.confirm(
+    'Al cerrar sesión se borran los datos de este dispositivo. Seguirán guardados en tu cuenta del servidor. ¿Continuar?'
+  );
+  if (!seguro) return;
+
+  const r = await cerrarSesion();
+  if (r.ok) return;
+
+  if (r.motivo === 'pendientes') {
+    const aunAsi = window.confirm(
+      `Tienes ${cambios(r.pendientes)} que todavía no se ${r.pendientes === 1 ? 'envió' : 'enviaron'} al servidor. Si cierras sesión ahora, se perderán. ¿Cerrar sesión de todos modos?`
+    );
+    if (aunAsi) await cerrarSesion({ forzar: true });
+  }
+}
+
+function SeccionCuenta() {
+  const usuario = useGastosStore((s) => s.usuario);
+  const estadoSync = useGastosStore((s) => s.estadoSync);
+
+  if (!usuario) return <FormularioCuenta usuarioVencido={null} />;
+  if (estadoSync === 'sesion-vencida') return <FormularioCuenta usuarioVencido={usuario} />;
+  return <CuentaActiva />;
+}
+
+// Sesión iniciada: quién es, cómo va la sincronización y cómo cerrar sesión
+function CuentaActiva() {
+  const usuario = useGastosStore((s) => s.usuario);
   const estadoSync = useGastosStore((s) => s.estadoSync);
   const pendientes = useGastosStore((s) => s.pendientes);
   const sincronizando = useGastosStore((s) => s.sincronizando);
   const ultimaSync = useGastosStore((s) => s.ultimaSync);
   const sincronizar = useGastosStore((s) => s.sincronizar);
+  const cerrarSesion = useGastosStore((s) => s.cerrarSesion);
+
+  const [cerrando, setCerrando] = useState(false);
 
   const [textoEstado, tono] = ESTADOS_SYNC[estadoSync] || [estadoSync, 'neutro'];
   const hora = ultimaSync
     ? new Date(ultimaSync).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
     : 'Aún no';
 
+  const salir = async () => {
+    if (cerrando) return;
+    setCerrando(true);
+    await cerrarSesionConConfirmacion(cerrarSesion);
+    setCerrando(false);
+  };
+
   return (
-    <Tarjeta
-      icono="sync-outline"
-      titulo="Sincronización"
-      detalle="Tus movimientos se copian solos en el servidor"
-    >
+    <Tarjeta icono="person-circle-outline" titulo={usuario.nombre} detalle={usuario.correo}>
       <Insignia texto={sincronizando ? 'Sincronizando…' : textoEstado} tono={tono} />
 
       <Fila clave="Cambios pendientes de enviar" valor={String(pendientes)} />
       <Fila clave="Última sincronización" valor={hora} ultimo />
 
       <Boton texto="Sincronizar ahora" onPress={() => sincronizar()} />
+      <Boton
+        secundario
+        texto={cerrando ? 'Cerrando sesión…' : 'Cerrar sesión'}
+        onPress={salir}
+      />
 
       {estadoSync === 'sin-conexion' ? (
         <Texto>
-          Sin conexión: tus cambios se guardan en este dispositivo y se enviarán solos cuando
+          Sin conexión tus cambios se guardan en este dispositivo y se enviarán solos cuando
           vuelva internet.
         </Texto>
       ) : null}
@@ -423,9 +468,195 @@ function SeccionSincronizacion() {
       {estadoSync === 'sin-servidor' ? (
         <Texto>
           No hay un servidor disponible. Tus datos siguen guardados aquí y se enviarán cuando lo
-          haya. Para usarlo, abre la app desde el servidor con el comando pnpm run servidor.
+          haya.
         </Texto>
       ) : null}
+
+      <Texto>
+        Al cerrar sesión se borran los datos de este dispositivo. Siguen guardados en tu cuenta y
+        regresan cuando vuelvas a entrar.
+      </Texto>
     </Tarjeta>
   );
 }
+
+// Entrar o crear una cuenta. Si la sesión venció, solo pide la contraseña de la misma cuenta.
+function FormularioCuenta({ usuarioVencido }) {
+  const registrar = useGastosStore((s) => s.registrar);
+  const iniciarSesion = useGastosStore((s) => s.iniciarSesion);
+  const cerrarSesion = useGastosStore((s) => s.cerrarSesion);
+  const pendientes = useGastosStore((s) => s.pendientes);
+
+  const [modo, setModo] = useState('entrar'); // 'entrar' | 'crear'
+  const [nombre, setNombre] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [contrasena, setContrasena] = useState('');
+  const [error, setError] = useState('');
+  const [ocupado, setOcupado] = useState(false);
+
+  const vencida = Boolean(usuarioVencido);
+  const crear = !vencida && modo === 'crear';
+
+  const enviar = async () => {
+    if (ocupado) return;
+    setError('');
+
+    const correoFinal = vencida ? usuarioVencido.correo : correo.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoFinal)) {
+      setError('Escribe un correo válido');
+      return;
+    }
+    if (crear && contrasena.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    if (!crear && !contrasena) {
+      setError('Escribe tu contraseña');
+      return;
+    }
+
+    setOcupado(true);
+    const r = crear
+      ? await registrar({ nombre: nombre.trim(), correo: correoFinal, contrasena })
+      : await iniciarSesion(correoFinal, contrasena);
+    setOcupado(false);
+
+    if (!r.ok) {
+      setError(r.error);
+      return;
+    }
+    setContrasena('');
+  };
+
+  // Con la sesión vencida, para usar otra cuenta primero hay que cerrar esta
+  const usarOtraCuenta = async () => {
+    if (ocupado) return;
+    setOcupado(true);
+    await cerrarSesionConConfirmacion(cerrarSesion);
+    setOcupado(false);
+  };
+
+  return (
+    <Tarjeta
+      icono="person-circle-outline"
+      titulo={vencida ? 'Sesión vencida' : 'Cuenta'}
+      detalle={
+        vencida ? usuarioVencido.correo : 'Entra o crea una cuenta para guardar tus datos en el servidor'
+      }
+    >
+      {!vencida && (
+        <View style={estilosCuenta.segmentado}>
+          {[
+            ['entrar', 'Entrar'],
+            ['crear', 'Crear cuenta'],
+          ].map(([id, etiqueta]) => (
+            <Pressable
+              key={id}
+              style={[estilosCuenta.segmento, modo === id && estilosCuenta.segmentoActivo]}
+              onPress={() => {
+                setModo(id);
+                setError('');
+              }}
+            >
+              <Text style={[estilosCuenta.segmentoTexto, modo === id && { color: '#fff' }]}>
+                {etiqueta}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
+
+      {vencida && (
+        <Texto>
+          Tu sesión venció. Escribe tu contraseña para volver a entrar
+          {pendientes > 0
+            ? `; tus cambios pendientes (${pendientes}) se enviarán al entrar.`
+            : '.'}
+        </Texto>
+      )}
+
+      {crear && (
+        <TextInput
+          style={estilosCuenta.campo}
+          value={nombre}
+          onChangeText={setNombre}
+          placeholder="Tu nombre"
+          placeholderTextColor={colors.textoClaro}
+          autoComplete="name"
+          maxLength={60}
+          accessibilityLabel="Nombre"
+        />
+      )}
+
+      {!vencida && (
+        <TextInput
+          style={estilosCuenta.campo}
+          value={correo}
+          onChangeText={setCorreo}
+          placeholder="Correo"
+          placeholderTextColor={colors.textoClaro}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          autoComplete="email"
+          accessibilityLabel="Correo"
+        />
+      )}
+
+      <TextInput
+        style={estilosCuenta.campo}
+        value={contrasena}
+        onChangeText={setContrasena}
+        placeholder={crear ? 'Contraseña (mínimo 8 caracteres)' : 'Contraseña'}
+        placeholderTextColor={colors.textoClaro}
+        secureTextEntry
+        autoCapitalize="none"
+        autoComplete={crear ? 'new-password' : 'current-password'}
+        onSubmitEditing={enviar}
+        accessibilityLabel="Contraseña"
+      />
+
+      {error ? <Text style={[estilosCuenta.error]}>{error}</Text> : null}
+
+      <Boton
+        texto={ocupado ? 'Un momento…' : crear ? 'Crear cuenta' : 'Entrar'}
+        onPress={enviar}
+      />
+
+      {vencida && (
+        <Boton secundario texto="Cerrar sesión y usar otra cuenta" onPress={usarOtraCuenta} />
+      )}
+
+      {!vencida && (
+        <Texto>
+          Sin cuenta tus datos solo se guardan en este dispositivo. Con una cuenta se copian al
+          servidor y cada cuenta tiene sus propios datos.
+        </Texto>
+      )}
+    </Tarjeta>
+  );
+}
+
+const estilosCuenta = StyleSheet.create({
+  campo: {
+    fontFamily: fonts.ui,
+    fontSize: 15,
+    color: colors.tinta,
+    backgroundColor: colors.fondoInput,
+    borderWidth: 1,
+    borderColor: colors.linea,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  segmentado: {
+    flexDirection: 'row',
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: colors.papelSuave,
+  },
+  segmento: { flex: 1, paddingVertical: 10, alignItems: 'center' },
+  segmentoActivo: { backgroundColor: colors.cobre },
+  segmentoTexto: { fontFamily: fonts.uiBold, fontSize: 12, color: colors.tinta },
+  error: { fontFamily: fonts.ui, fontSize: 12, lineHeight: 18, color: colors.gasto },
+});
